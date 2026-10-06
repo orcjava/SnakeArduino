@@ -56,9 +56,9 @@
       background-color: #6366f1;
     }
     #scorePanel{
-      width: 100px;
+      width: 300px;
       margin: 20px auto;
-      font-size: 40px;
+      font-size: 28px;
       background-color: rgba(31, 41, 55, 0.9);
       padding: 10px 20px;
       border-radius: 10px;
@@ -122,6 +122,36 @@
     .snakeHead::after{
       right: 5px;
     }
+    #gameOverMsg{
+      display: none;
+      background-color: rgba(127, 29, 29, 0.95);
+      width: 400px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(239,68,68,0.5);
+    }
+    #gameOverMsg h2{
+      margin: 0 0 10px 0;
+      color: #fca5a5;
+      font-size: 40px;
+    }
+    #gameOverMsg p{
+      margin: 10px;
+      font-size: 24px;
+    }
+    #gameOverMsg button{
+      font-size: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4f46e5;
+      color: white;
+      cursor: pointer;
+    }
+    #gameOverMsg button:hover{
+      background-color: #6366f1;
+    }
   </style>
 </head>
 <body>
@@ -135,7 +165,19 @@
     Start New Game
   </button>
 </div>
-<div id="scorePanel">0</div>
+<div id="gameOverMsg">
+  <h2>GAME OVER</h2>
+  <p>Your Score: <span id="finalScore">0</span></p>
+  <p>Best Score: <span id="bestScore">0</span></p>
+  <button onclick="startNewGame();">
+    Start New Game
+  </button>
+</div>
+<div id="scorePanel">
+  Score: <span id="score">0</span>
+  &nbsp;&nbsp;
+  Best: <span id="best">0</span>
+</div>
 <div class="gameArea">
   <div class="buttonsPanel gridPanel">
     <button class="fullLine" onclick="SetDirection('up');">Up</button>
@@ -147,6 +189,8 @@
 </div>
 <script>
   let score = 0;
+  let bestScore = 0;
+  let speed = 500;
   let removeTailCnt=0;
   const CellValues={
     EMPTY:0,
@@ -163,17 +207,19 @@
   let board=[];
   function startNewGame(){
     score = 0;
+    speed = 500;
     removeTailCnt=0;
     direction="right";
     gameOver=false;
     board=[];
+    document.getElementById("score").innerHTML=score;
+    document.getElementById("gameStartMsg").style.display="none";
+    document.getElementById("gameOverMsg").style.display="none";
     createBoard();
     InitSnake();
     AddFood();
     showBoardWithDiv();
-
-    document.getElementById("gameStartMsg").style.display="none";
-    timeId = setTimeout(move,500)
+    timeId = setTimeout(move,speed)
   }
   function createBoard(){
     for(let i=0;i<numOfRows;i++){
@@ -220,8 +266,11 @@
   function FoodEaten(){
     removeTailCnt=3;
     score+=10;
+    if(score % 30 === 0 && speed > 150){
+      speed -= 50;
+    }
     AddFood();
-    document.getElementById("scorePanel").innerHTML=score;
+    document.getElementById("score").innerHTML=score;
   }
   function GenStep(newRow,newCol,head){
     if (board[newRow][newCol]===CellValues.FOOD) {
@@ -291,14 +340,21 @@
     }
     showBoardWithDiv();
     if (!gameOver) {
-      timeId = setTimeout(move, 500)
+      timeId = setTimeout(move,speed)
     }
   }
   function SetDirection(newDirection){
     direction=newDirection;
   }
   function endGame(){
-    document.getElementById("gameStartMsg").style.display="block";
+    if(score > bestScore){
+      bestScore = score;
+    }
+    document.getElementById("finalScore").innerHTML=score;
+    document.getElementById("bestScore").innerHTML=bestScore;
+    document.getElementById("best").innerHTML=bestScore;
+    document.getElementById("gameStartMsg").style.display="none";
+    document.getElementById("gameOverMsg").style.display="block";
     clearTimeout(timeId);
     gameOver=true;
   }
