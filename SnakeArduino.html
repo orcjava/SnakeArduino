@@ -71,6 +71,16 @@
     .snakeHead{
       background-color: #129ff6;
     }
+    .connect-btn {
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
+      font-size: 18px;
+      background-color: #129ff6;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -84,6 +94,9 @@
     להתחלת משחק חדש
   </button>
 </div>
+
+<button id="connectBtn" class="connect-btn">🔌 לחצו לחיבור הג'ויסטיק למשחק</button>
+
 <div class="buttonsPanel gridPanel">
   <button class="fullLine "  onclick="SetDirection('up');">למעלה</button>
   <button class="halfLine1"  onclick="SetDirection('right');">ימינה</button>
@@ -101,26 +114,28 @@
     SNAKE:2,
     SNAKE_HEAD:4,
   }
-  let direction="left";
+  let direction="";
   let numOfCols=20;
   let numOfRows=20;
   let timeId;
   let gameOver=false;
   let snake;
   let board=[];
+  let writer = null;
+
   function startNewGame(){
     score = 0;
     removeTailCnt=0;
-    direction="left";
+    direction="";
     gameOver=false;
     board=[];
     createBoard();
     InitSnake();
     AddFood();
     showBoardWithDiv();
-
     document.getElementById("gameStartMsg").style.display="none";
-    timeId = setTimeout(move,500)
+    if (timeId) clearTimeout(timeId);
+    timeId = setTimeout(move, 500)
   }
   function createBoard(){
     for(let i=0;i<numOfRows;i++){
@@ -174,7 +189,6 @@
     if (board[newRow][newCol]===CellValues.FOOD) {
       FoodEaten();
     }
-
     if (removeTailCnt === 0){
       let tail = snake.pop();
       board[tail.r][tail.c] = CellValues.EMPTY;
@@ -184,28 +198,31 @@
     if ((board[newRow][newCol]===CellValues.SNAKE)||
             (board[newRow][newCol]===CellValues.SNAKE_HEAD)){
       endGame();
+      return;
     }
     snake.unshift({r:newRow,c:newCol});
-    board[newRow][newCol]=CellValues.SNAKE_HEAD
+    board[newRow][newCol]=CellValues.SNAKE_HEAD;
     board[head.r][head.c]=CellValues.SNAKE;
   }
   function moveLeft(){
-    let head=snake[0];
-    let newCol=head.c+1;
-    let newRow=head.r;
-    if (newCol>=numOfCols) {
-      endGame()
-    }
-    GenStep(newRow,newCol,head);
-  }
-  function moveRight(){
     let head=snake[0];
     let newCol=head.c-1;
     let newRow=head.r;
     if (newCol < 0) {
       endGame()
+    } else {
+      GenStep(newRow,newCol,head);
     }
-    GenStep(newRow,newCol,head);
+  }
+  function moveRight(){
+    let head=snake[0];
+    let newCol=head.c+1;
+    let newRow=head.r;
+    if (newCol>=numOfCols) {
+      endGame()
+    } else {
+      GenStep(newRow,newCol,head);
+    }
   }
   function moveUp(){
     let head=snake[0];
@@ -213,8 +230,9 @@
     let newRow=head.r-1;
     if (newRow < 0) {
       endGame()
+    } else {
+      GenStep(newRow,newCol,head);
     }
-    GenStep(newRow,newCol,head);
   }
   function moveDown(){
     let head=snake[0];
@@ -222,31 +240,85 @@
     let newRow=head.r+1;
     if (newRow >= numOfRows) {
       endGame()
+    } else {
+      GenStep(newRow,newCol,head);
     }
-    GenStep(newRow,newCol,head);
   }
   function move(){
-    switch (direction) {
-      case "up":    moveUp();     break;
-      case "right": moveRight();  break;
-      case "left":  moveLeft();   break;
-      case "down":  moveDown();   break;
+    if (direction !== "") {
+      switch (direction) {
+        case "up":    moveUp();     break;
+        case "right": moveRight();  break;
+        case "left":  moveLeft();   break;
+        case "down":  moveDown();   break;
+      }
+      showBoardWithDiv();
     }
-    showBoardWithDiv();
     if (!gameOver) {
       timeId = setTimeout(move, 500)
     }
   }
   function SetDirection(newDirection){
+    if (direction === "") {
+      direction = newDirection;
+      return;
+    }
+    if (direction === "left" && newDirection === "right") return;
+    if (direction === "right" && newDirection === "left") return;
+    if (direction === "up" && newDirection === "down") return;
+    if (direction === "down" && newDirection === "up") return;
     direction=newDirection;
   }
   function endGame(){
     document.getElementById("gameStartMsg").style.display="block";
     clearTimeout(timeId);
     gameOver=true;
+    if (writer) {
+      writer.write("GAMEOVER\n");
+    }
   }
 
   document.getElementById("gameStartMsg").style.display="block";
+
+  document.getElementById('connectBtn').addEventListener('click', async () => {
+    try {
+      const port = await navigator.serial.requestPort();
+      await port.open({ baudRate: 115200 });
+
+      document.getElementById('connectBtn').innerText = "🔌 מחובר!";
+      document.getElementById('connectBtn').style.backgroundColor = "lightgreen";
+
+      const textEncoder = new TextEncoderStream();
+      const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
+      writer = textEncoder.writable.getWriter();
+
+      const textDecoder = new TextDecoderStream();
+      const readableStreamClosedDecoder = port.readable.pipeTo(textDecoder.writable);
+      const reader = textDecoder.readable.getReader();
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) {
+          reader.releaseLock();
+          break;
+        }
+        if (value) {
+          const command = value.trim();
+          if (command === "UP")    SetDirection("up");
+          if (command === "DOWN")  SetDirection("down");
+
+          if (command === "LEFT")  SetDirection("right");
+          if (command === "RIGHT") SetDirection("left");
+
+          if (command === "GREEN" && document.getElementById("gameStartMsg").style.display !== "none") {
+            startNewGame();
+          }
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  });
 </script>
 </body>
 </html>
