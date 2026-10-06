@@ -92,12 +92,35 @@
     }
     .food{
       background-color: #f43f5e;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #f43f5e;
     }
     .snake{
       background-color: #38bdf8;
+      border-radius: 6px;
+      box-shadow: 0 0 6px #38bdf8;
     }
     .snakeHead{
-      background-color: #22d3ee;
+      background-color: #a855f7;
+      border-radius: 8px;
+      box-shadow: 0 0 15px #a855f7;
+      position: relative;
+    }
+    .snakeHead::before,
+    .snakeHead::after{
+      content: "";
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: white;
+      border-radius: 50%;
+      top: 5px;
+    }
+    .snakeHead::before{
+      left: 5px;
+    }
+    .snakeHead::after{
+      right: 5px;
     }
   </style>
 </head>
