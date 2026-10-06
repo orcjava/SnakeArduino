@@ -2,32 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>משחק סנייק</title>
+  <title>Snake Game</title>
   <style>
     body{
-      direction: rtl;
+      direction: ltr;
+      font-family: Arial, sans-serif;
       font-size: 30px;
-      background-color: yellow;
-    }
-    .greenText{
-      background-color: lightgreen;
-      width: 80%;
-      margin-right: 10%;
-      margin-top: 30px;
-      padding: 10px;
+      color: white;
+      background: linear-gradient(135deg, #17143a, #30206b, #162b4d);
+      min-height: 100vh;
+      margin: 0;
       text-align: center;
     }
+    .greenText{
+      background-color: rgba(31, 41, 55, 0.9);
+      width: 80%;
+      margin: 30px auto;
+      padding: 10px;
+      text-align: center;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
     .gridPanel{
-      width: 200px;
-      position: fixed;
-      top: 150px;
-      right: 10px;
-      background-color: lightblue;
+      width: 180px;
+      margin: 0;
+      background-color: rgba(31, 41, 55, 0.95);
       border-radius: 10px;
       padding: 10px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
       grid-template-columns: repeat(4,1fr);
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
     .fullLine{
       grid-column: 2/span 2;
@@ -38,60 +43,85 @@
     .halfLine2{
       grid-column: 3/span 2;
     }
+    .gridPanel button{
+      font-size: 18px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4f46e5;
+      color: white;
+      cursor: pointer;
+    }
+    .gridPanel button:hover{
+      background-color: #6366f1;
+    }
     #scorePanel{
-      position: fixed;
-      top: 300px;
-      right: 100px;
+      width: 100px;
+      margin: 20px auto;
       font-size: 40px;
+      background-color: rgba(31, 41, 55, 0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
     }
-    td{
-      height: 20px;
-      width: 20px;
-      border: 1px solid black;
-      background-color: white;
+    .gameArea{
+      position: relative;
+      width: 608px;
+      margin: 20px auto;
     }
-    table{margin: 0 auto; }
     #gameBoard{
-      margin: 0 auto;
+      margin: 0;
       width: 600px;
       display: grid;
       grid-template-columns: repeat(20,30px);
       grid-template-rows: repeat(20,30px);
-      background-color: white;
+      background-color: #111827;
+      border: 4px solid #6366f1;
+      border-radius: 10px;
+      box-shadow: 0 0 25px rgba(99,102,241,0.5);
+      overflow: hidden;
+    }
+    .buttonsPanel{
+      position: absolute;
+      right: calc(100% + 30px);
+      top: 50%;
+      transform: translateY(-50%);
     }
     #gameBoard div{
-      border: 1px solid black;
+      border: 1px solid #1f2937;
     }
     .food{
-      background-color: red ;
+      background-color: #f43f5e;
     }
     .snake{
-      background-color: lightskyblue ;
+      background-color: #38bdf8;
     }
     .snakeHead{
-      background-color: #129ff6;
+      background-color: #22d3ee;
     }
   </style>
 </head>
 <body>
 <h1 class="greenText">
-  משחק סנייק
+  Snake Game
 </h1>
 <div class="greenText" id="gameStartMsg">
-  נא ללחוץ כדי להתחיל את המשחק
+  Press the button to start the game
   <br />
   <button onclick="startNewGame();">
-    להתחלת משחק חדש
+    Start New Game
   </button>
 </div>
-<div class="buttonsPanel gridPanel">
-  <button class="fullLine "  onclick="SetDirection('up');">למעלה</button>
-  <button class="halfLine1"  onclick="SetDirection('right');">ימינה</button>
-  <button class="halfLine2"  onclick="SetDirection('left');">שמאלה</button>
-  <button class="fullLine "  onclick="SetDirection('down');">למטה</button>
-</div>
 <div id="scorePanel">0</div>
-<div id="gameBoard"></div>
+<div class="gameArea">
+  <div class="buttonsPanel gridPanel">
+    <button class="fullLine" onclick="SetDirection('up');">Up</button>
+    <button class="halfLine1" onclick="SetDirection('left');">Left</button>
+    <button class="halfLine2" onclick="SetDirection('right');">Right</button>
+    <button class="fullLine" onclick="SetDirection('down');">Down</button>
+  </div>
+  <div id="gameBoard"></div>
+</div>
 <script>
   let score = 0;
   let removeTailCnt=0;
@@ -101,7 +131,7 @@
     SNAKE:2,
     SNAKE_HEAD:4,
   }
-  let direction="left";
+  let direction="right";
   let numOfCols=20;
   let numOfRows=20;
   let timeId;
@@ -111,7 +141,7 @@
   function startNewGame(){
     score = 0;
     removeTailCnt=0;
-    direction="left";
+    direction="right";
     gameOver=false;
     board=[];
     createBoard();
@@ -174,7 +204,6 @@
     if (board[newRow][newCol]===CellValues.FOOD) {
       FoodEaten();
     }
-
     if (removeTailCnt === 0){
       let tail = snake.pop();
       board[tail.r][tail.c] = CellValues.EMPTY;
@@ -184,6 +213,7 @@
     if ((board[newRow][newCol]===CellValues.SNAKE)||
             (board[newRow][newCol]===CellValues.SNAKE_HEAD)){
       endGame();
+      return;
     }
     snake.unshift({r:newRow,c:newCol});
     board[newRow][newCol]=CellValues.SNAKE_HEAD
@@ -191,19 +221,21 @@
   }
   function moveLeft(){
     let head=snake[0];
-    let newCol=head.c+1;
+    let newCol=head.c-1;
     let newRow=head.r;
-    if (newCol>=numOfCols) {
-      endGame()
+    if (newCol < 0) {
+      endGame();
+      return;
     }
     GenStep(newRow,newCol,head);
   }
   function moveRight(){
     let head=snake[0];
-    let newCol=head.c-1;
+    let newCol=head.c+1;
     let newRow=head.r;
-    if (newCol < 0) {
-      endGame()
+    if (newCol>=numOfCols) {
+      endGame();
+      return;
     }
     GenStep(newRow,newCol,head);
   }
@@ -212,7 +244,8 @@
     let newCol=head.c;
     let newRow=head.r-1;
     if (newRow < 0) {
-      endGame()
+      endGame();
+      return;
     }
     GenStep(newRow,newCol,head);
   }
@@ -221,7 +254,8 @@
     let newCol=head.c;
     let newRow=head.r+1;
     if (newRow >= numOfRows) {
-      endGame()
+      endGame();
+      return;
     }
     GenStep(newRow,newCol,head);
   }
@@ -245,7 +279,6 @@
     clearTimeout(timeId);
     gameOver=true;
   }
-
   document.getElementById("gameStartMsg").style.display="block";
 </script>
 </body>
