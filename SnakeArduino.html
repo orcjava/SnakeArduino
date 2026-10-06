@@ -159,7 +159,7 @@
   Snake Game
 </h1>
 <div class="greenText" id="gameStartMsg">
-  Press the button to start the game
+  Press the red or green button to start the game
   <br />
   <button onclick="startNewGame();">
     Start New Game
@@ -169,6 +169,7 @@
   <h2>GAME OVER</h2>
   <p>Your Score: <span id="finalScore">0</span></p>
   <p>Best Score: <span id="bestScore">0</span></p>
+  <p>Press the red or green button to start a new game</p>
   <button onclick="startNewGame();">
     Start New Game
   </button>
@@ -206,6 +207,8 @@
   let snake;
   let board=[];
   function startNewGame(){
+    clearTimeout(timeId);
+    timeId=null;
     score = 0;
     speed = 500;
     removeTailCnt=0;
@@ -332,16 +335,20 @@
     GenStep(newRow,newCol,head);
   }
   function move(){
+    if(gameOver){
+      return;
+    }
     switch (direction) {
       case "up":    moveUp();     break;
       case "right": moveRight();  break;
       case "left":  moveLeft();   break;
       case "down":  moveDown();   break;
     }
-    showBoardWithDiv();
-    if (!gameOver) {
-      timeId = setTimeout(move,speed)
+    if(gameOver){
+      return;
     }
+    showBoardWithDiv();
+    timeId = setTimeout(move,speed)
   }
   function SetDirection(newDirection){
     direction=newDirection;
@@ -356,8 +363,33 @@
     document.getElementById("gameStartMsg").style.display="none";
     document.getElementById("gameOverMsg").style.display="block";
     clearTimeout(timeId);
+    timeId=null;
     gameOver=true;
   }
+  document.addEventListener("keydown",function(event){
+    if(event.key==="ArrowUp"){
+      event.preventDefault();
+      SetDirection("up");
+    }
+    if(event.key==="ArrowDown"){
+      event.preventDefault();
+      SetDirection("down");
+    }
+    if(event.key==="ArrowLeft"){
+      event.preventDefault();
+      SetDirection("left");
+    }
+    if(event.key==="ArrowRight"){
+      event.preventDefault();
+      SetDirection("right");
+    }
+    if(event.key==="Enter"){
+      event.preventDefault();
+      if(gameOver || document.getElementById("gameStartMsg").style.display!=="none"){
+        startNewGame();
+      }
+    }
+  });
   document.getElementById("gameStartMsg").style.display="block";
 </script>
 </body>
