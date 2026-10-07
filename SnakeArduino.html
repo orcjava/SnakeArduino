@@ -2,32 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>משחק סנייק</title>
+  <title>Snake Game</title>
   <style>
     body{
-      direction: rtl;
+      direction: ltr;
+      font-family: Arial, sans-serif;
       font-size: 30px;
-      background-color: yellow;
-    }
-    .greenText{
-      background-color: lightgreen;
-      width: 80%;
-      margin-right: 10%;
-      margin-top: 30px;
-      padding: 10px;
+      color: white;
+      background: linear-gradient(135deg, #17143a, #30206b, #162b4d);
+      min-height: 100vh;
+      margin: 0;
       text-align: center;
     }
+    .greenText{
+      background-color: rgba(31, 41, 55, 0.9);
+      width: 80%;
+      margin: 30px auto;
+      padding: 10px;
+      text-align: center;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    }
     .gridPanel{
-      width: 200px;
-      position: fixed;
-      top: 150px;
-      right: 10px;
-      background-color: lightblue;
+      width: 180px;
+      margin: 0;
+      background-color: rgba(31, 41, 55, 0.95);
       border-radius: 10px;
       padding: 10px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
       grid-template-columns: repeat(4,1fr);
+      box-shadow: 0 0 20px rgba(0,0,0,0.4);
     }
     .fullLine{
       grid-column: 2/span 2;
@@ -38,75 +43,155 @@
     .halfLine2{
       grid-column: 3/span 2;
     }
+    .gridPanel button{
+      font-size: 18px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background-color: #4f46e5;
+      color: white;
+      cursor: pointer;
+    }
+    .gridPanel button:hover{
+      background-color: #6366f1;
+    }
     #scorePanel{
-      position: fixed;
-      top: 300px;
-      right: 100px;
-      font-size: 40px;
+      width: 300px;
+      margin: 20px auto;
+      font-size: 28px;
+      background-color: rgba(31, 41, 55, 0.9);
+      padding: 10px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.4);
     }
-    td{
-      height: 20px;
-      width: 20px;
-      border: 1px solid black;
-      background-color: white;
+    .gameArea{
+      position: relative;
+      width: 608px;
+      margin: 20px auto;
     }
-    table{margin: 0 auto; }
     #gameBoard{
-      margin: 0 auto;
+      margin: 0;
       width: 600px;
       display: grid;
       grid-template-columns: repeat(20,30px);
       grid-template-rows: repeat(20,30px);
-      background-color: white;
+      background-color: #111827;
+      border: 4px solid #6366f1;
+      border-radius: 10px;
+      box-shadow: 0 0 25px rgba(99,102,241,0.5);
+      overflow: hidden;
+    }
+    .buttonsPanel{
+      position: absolute;
+      right: calc(100% + 30px);
+      top: 50%;
+      transform: translateY(-50%);
     }
     #gameBoard div{
-      border: 1px solid black;
+      border: 1px solid #1f2937;
     }
     .food{
-      background-color: red ;
+      background-color: #f43f5e;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #f43f5e;
     }
     .snake{
-      background-color: lightskyblue ;
+      background-color: #38bdf8;
+      border-radius: 6px;
+      box-shadow: 0 0 6px #38bdf8;
     }
     .snakeHead{
-      background-color: #129ff6;
+      background-color: #a855f7;
+      border-radius: 8px;
+      box-shadow: 0 0 15px #a855f7;
+      position: relative;
     }
-    .connect-btn {
-      display: block;
-      margin: 20px auto;
-      padding: 10px;
-      font-size: 18px;
-      background-color: #129ff6;
-      color: white;
+    .snakeHead::before,
+    .snakeHead::after{
+      content: "";
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      background-color: white;
+      border-radius: 50%;
+      top: 5px;
+    }
+    .snakeHead::before{
+      left: 5px;
+    }
+    .snakeHead::after{
+      right: 5px;
+    }
+    #gameOverMsg{
+      display: none;
+      background-color: rgba(127, 29, 29, 0.95);
+      width: 400px;
+      margin: 30px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(239,68,68,0.5);
+    }
+    #gameOverMsg h2{
+      margin: 0 0 10px 0;
+      color: #fca5a5;
+      font-size: 40px;
+    }
+    #gameOverMsg p{
+      margin: 10px;
+      font-size: 24px;
+    }
+    #gameOverMsg button{
+      font-size: 20px;
+      padding: 10px 20px;
       border: none;
+      border-radius: 8px;
+      background-color: #4f46e5;
+      color: white;
       cursor: pointer;
+    }
+    #gameOverMsg button:hover{
+      background-color: #6366f1;
     }
   </style>
 </head>
 <body>
 <h1 class="greenText">
-  משחק סנייק
+  Snake Game
 </h1>
 <div class="greenText" id="gameStartMsg">
-  נא ללחוץ כדי להתחיל את המשחק
+  Press the red or green button to start the game
   <br />
   <button onclick="startNewGame();">
-    להתחלת משחק חדש
+    Start New Game
   </button>
 </div>
-
-<button id="connectBtn" class="connect-btn">🔌 לחצו לחיבור הג'ויסטיק למשחק</button>
-
-<div class="buttonsPanel gridPanel">
-  <button class="fullLine "  onclick="SetDirection('up');">למעלה</button>
-  <button class="halfLine1"  onclick="SetDirection('right');">ימינה</button>
-  <button class="halfLine2"  onclick="SetDirection('left');">שמאלה</button>
-  <button class="fullLine "  onclick="SetDirection('down');">למטה</button>
+<div id="gameOverMsg">
+  <h2>GAME OVER</h2>
+  <p>Your Score: <span id="finalScore">0</span></p>
+  <p>Best Score: <span id="bestScore">0</span></p>
+  <p>Press the red or green button to start a new game</p>
+  <button onclick="startNewGame();">
+    Start New Game
+  </button>
 </div>
-<div id="scorePanel">0</div>
-<div id="gameBoard"></div>
+<div id="scorePanel">
+  Score: <span id="score">0</span>
+  &nbsp;&nbsp;
+  Best: <span id="best">0</span>
+</div>
+<div class="gameArea">
+  <div class="buttonsPanel gridPanel">
+    <button class="fullLine" onclick="SetDirection('up');">Up</button>
+    <button class="halfLine1" onclick="SetDirection('left');">Left</button>
+    <button class="halfLine2" onclick="SetDirection('right');">Right</button>
+    <button class="fullLine" onclick="SetDirection('down');">Down</button>
+  </div>
+  <div id="gameBoard"></div>
+</div>
 <script>
   let score = 0;
+  let bestScore = 0;
+  let speed = 500;
   let removeTailCnt=0;
   const CellValues={
     EMPTY:0,
@@ -114,28 +199,30 @@
     SNAKE:2,
     SNAKE_HEAD:4,
   }
-  let direction="";
+  let direction="right";
   let numOfCols=20;
   let numOfRows=20;
   let timeId;
   let gameOver=false;
   let snake;
   let board=[];
-  let writer = null;
-
   function startNewGame(){
+    clearTimeout(timeId);
+    timeId=null;
     score = 0;
+    speed = 500;
     removeTailCnt=0;
-    direction="";
+    direction="right";
     gameOver=false;
     board=[];
+    document.getElementById("score").innerHTML=score;
+    document.getElementById("gameStartMsg").style.display="none";
+    document.getElementById("gameOverMsg").style.display="none";
     createBoard();
     InitSnake();
     AddFood();
     showBoardWithDiv();
-    document.getElementById("gameStartMsg").style.display="none";
-    if (timeId) clearTimeout(timeId);
-    timeId = setTimeout(move, 500)
+    timeId = setTimeout(move,speed)
   }
   function createBoard(){
     for(let i=0;i<numOfRows;i++){
@@ -182,8 +269,11 @@
   function FoodEaten(){
     removeTailCnt=3;
     score+=10;
+    if(score % 30 === 0 && speed > 150){
+      speed -= 50;
+    }
     AddFood();
-    document.getElementById("scorePanel").innerHTML=score;
+    document.getElementById("score").innerHTML=score;
   }
   function GenStep(newRow,newCol,head){
     if (board[newRow][newCol]===CellValues.FOOD) {
@@ -201,7 +291,7 @@
       return;
     }
     snake.unshift({r:newRow,c:newCol});
-    board[newRow][newCol]=CellValues.SNAKE_HEAD;
+    board[newRow][newCol]=CellValues.SNAKE_HEAD
     board[head.r][head.c]=CellValues.SNAKE;
   }
   function moveLeft(){
@@ -209,116 +299,98 @@
     let newCol=head.c-1;
     let newRow=head.r;
     if (newCol < 0) {
-      endGame()
-    } else {
-      GenStep(newRow,newCol,head);
+      endGame();
+      return;
     }
+    GenStep(newRow,newCol,head);
   }
   function moveRight(){
     let head=snake[0];
     let newCol=head.c+1;
     let newRow=head.r;
     if (newCol>=numOfCols) {
-      endGame()
-    } else {
-      GenStep(newRow,newCol,head);
+      endGame();
+      return;
     }
+    GenStep(newRow,newCol,head);
   }
   function moveUp(){
     let head=snake[0];
     let newCol=head.c;
     let newRow=head.r-1;
     if (newRow < 0) {
-      endGame()
-    } else {
-      GenStep(newRow,newCol,head);
+      endGame();
+      return;
     }
+    GenStep(newRow,newCol,head);
   }
   function moveDown(){
     let head=snake[0];
     let newCol=head.c;
     let newRow=head.r+1;
     if (newRow >= numOfRows) {
-      endGame()
-    } else {
-      GenStep(newRow,newCol,head);
-    }
-  }
-  function move(){
-    if (direction !== "") {
-      switch (direction) {
-        case "up":    moveUp();     break;
-        case "right": moveRight();  break;
-        case "left":  moveLeft();   break;
-        case "down":  moveDown();   break;
-      }
-      showBoardWithDiv();
-    }
-    if (!gameOver) {
-      timeId = setTimeout(move, 500)
-    }
-  }
-  function SetDirection(newDirection){
-    if (direction === "") {
-      direction = newDirection;
+      endGame();
       return;
     }
-    if (direction === "left" && newDirection === "right") return;
-    if (direction === "right" && newDirection === "left") return;
-    if (direction === "up" && newDirection === "down") return;
-    if (direction === "down" && newDirection === "up") return;
+    GenStep(newRow,newCol,head);
+  }
+  function move(){
+    if(gameOver){
+      return;
+    }
+    switch (direction) {
+      case "up":    moveUp();     break;
+      case "right": moveRight();  break;
+      case "left":  moveLeft();   break;
+      case "down":  moveDown();   break;
+    }
+    if(gameOver){
+      return;
+    }
+    showBoardWithDiv();
+    timeId = setTimeout(move,speed)
+  }
+  function SetDirection(newDirection){
     direction=newDirection;
   }
   function endGame(){
-    document.getElementById("gameStartMsg").style.display="block";
-    clearTimeout(timeId);
-    gameOver=true;
-    if (writer) {
-      writer.write("GAMEOVER\n");
+    if(score > bestScore){
+      bestScore = score;
     }
+    document.getElementById("finalScore").innerHTML=score;
+    document.getElementById("bestScore").innerHTML=bestScore;
+    document.getElementById("best").innerHTML=bestScore;
+    document.getElementById("gameStartMsg").style.display="none";
+    document.getElementById("gameOverMsg").style.display="block";
+    clearTimeout(timeId);
+    timeId=null;
+    gameOver=true;
   }
-
-  document.getElementById("gameStartMsg").style.display="block";
-
-  document.getElementById('connectBtn').addEventListener('click', async () => {
-    try {
-      const port = await navigator.serial.requestPort();
-      await port.open({ baudRate: 115200 });
-
-      document.getElementById('connectBtn').innerText = "🔌 מחובר!";
-      document.getElementById('connectBtn').style.backgroundColor = "lightgreen";
-
-      const textEncoder = new TextEncoderStream();
-      const writableStreamClosed = textEncoder.readable.pipeTo(port.writable);
-      writer = textEncoder.writable.getWriter();
-
-      const textDecoder = new TextDecoderStream();
-      const readableStreamClosedDecoder = port.readable.pipeTo(textDecoder.writable);
-      const reader = textDecoder.readable.getReader();
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
-          reader.releaseLock();
-          break;
-        }
-        if (value) {
-          const command = value.trim();
-          if (command === "UP")    SetDirection("up");
-          if (command === "DOWN")  SetDirection("down");
-
-          if (command === "LEFT")  SetDirection("right");
-          if (command === "RIGHT") SetDirection("left");
-
-          if (command === "GREEN" && document.getElementById("gameStartMsg").style.display !== "none") {
-            startNewGame();
-          }
-        }
+  document.addEventListener("keydown",function(event){
+    if(event.key==="ArrowUp"){
+      event.preventDefault();
+      SetDirection("up");
+    }
+    if(event.key==="ArrowDown"){
+      event.preventDefault();
+      SetDirection("down");
+    }
+    if(event.key==="ArrowLeft"){
+      event.preventDefault();
+      SetDirection("left");
+    }
+    if(event.key==="ArrowRight"){
+      event.preventDefault();
+      SetDirection("right");
+    }
+    if(event.key==="Enter"){
+      event.preventDefault();
+      if(gameOver || document.getElementById("gameStartMsg").style.display!=="none"){
+        startNewGame();
       }
-    } catch (error) {
-      console.error(error);
     }
   });
+  document.getElementById("gameStartMsg").style.display="block";
 </script>
 </body>
 </html>
