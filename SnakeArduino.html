@@ -152,6 +152,23 @@
     #gameOverMsg button:hover{
       background-color: #6366f1;
     }
+    #connectArduino{
+      font-size: 20px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      background-color: #059669;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    #connectArduino:hover{
+      background-color: #10b981;
+    }
+    #connectionStatus{
+      font-size: 18px;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -164,6 +181,13 @@
   <button onclick="startNewGame();">
     Start New Game
   </button>
+  <br />
+  <button id="connectArduino" onclick="connectArduino();">
+    Connect Arduino
+  </button>
+  <div id="connectionStatus">
+    Arduino not connected
+  </div>
 </div>
 <div id="gameOverMsg">
   <h2>GAME OVER</h2>
@@ -200,12 +224,37 @@
     SNAKE_HEAD:4,
   }
   let direction="right";
+  let directionChanged=false;
   let numOfCols=20;
   let numOfRows=20;
   let timeId;
   let gameOver=false;
   let snake;
   let board=[];
+  let serialPort = null;
+  let serialWriter = null;
+  async function connectArduino(){
+    if (!("serial" in navigator)){
+      document.getElementById("connectionStatus").innerHTML="Web Serial is not supported in this browser";
+      return;
+    }
+    try{
+      serialPort = await navigator.serial.requestPort();
+      await serialPort.open({baudRate: 9600});
+      serialWriter = serialPort.writable.getWriter();
+      document.getElementById("connectionStatus").innerHTML="Arduino connected";
+    }
+    catch(error){
+      document.getElementById("connectionStatus").innerHTML="Arduino connection failed";
+    }
+  }
+  async function sendToArduino(message){
+    if(serialWriter === null){
+      return;
+    }
+    const data = new TextEncoder().encode(message + "\n");
+    await serialWriter.write(data);
+  }
   function startNewGame(){
     clearTimeout(timeId);
     timeId=null;
@@ -213,6 +262,7 @@
     speed = 500;
     removeTailCnt=0;
     direction="right";
+    directionChanged=false;
     gameOver=false;
     board=[];
     document.getElementById("score").innerHTML=score;
@@ -274,6 +324,7 @@
     }
     AddFood();
     document.getElementById("score").innerHTML=score;
+    sendToArduino("FOOD");
   }
   function GenStep(newRow,newCol,head){
     if (board[newRow][newCol]===CellValues.FOOD) {
@@ -348,26 +399,29 @@
       return;
     }
     showBoardWithDiv();
+    directionChanged=false;
     timeId = setTimeout(move,speed)
   }
   function SetDirection(newDirection){
-    if (direction==="right" && newDirection==="left"){
+    if(directionChanged){
       return;
     }
-
-    if (direction==="left" && newDirection==="right"){
+    if(direction==="right" && newDirection==="left"){
       return;
     }
-
-    if (direction==="up" && newDirection==="down"){
+    if(direction==="left" && newDirection==="right"){
       return;
     }
-
-    if (direction==="down" && newDirection==="up"){
+    if(direction==="up" && newDirection==="down"){
       return;
     }
-
-    direction=newDirection;
+    if(direction==="down" && newDirection==="up"){
+      return;
+    }
+    if(direction!==newDirection){
+      direction=newDirection;
+      directionChanged=true;
+    }
   }
   function endGame(){
     if(score > bestScore){
@@ -381,6 +435,7 @@
     clearTimeout(timeId);
     timeId=null;
     gameOver=true;
+    sendToArduino("GAMEOVER");
   }
   document.addEventListener("keydown",function(event){
     if(event.key==="ArrowUp"){
