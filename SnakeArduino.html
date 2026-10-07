@@ -351,6 +351,22 @@
     timeId = setTimeout(move,speed)
   }
   function SetDirection(newDirection){
+    if (direction==="right" && newDirection==="left"){
+      return;
+    }
+
+    if (direction==="left" && newDirection==="right"){
+      return;
+    }
+
+    if (direction==="up" && newDirection==="down"){
+      return;
+    }
+
+    if (direction==="down" && newDirection==="up"){
+      return;
+    }
+
     direction=newDirection;
   }
   function endGame(){
