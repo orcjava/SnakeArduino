@@ -224,6 +224,7 @@
     SNAKE_HEAD:4,
   }
   let direction="right";
+  let directionChanged=false;
   let numOfCols=20;
   let numOfRows=20;
   let timeId;
@@ -261,6 +262,7 @@
     speed = 500;
     removeTailCnt=0;
     direction="right";
+    directionChanged=false;
     gameOver=false;
     board=[];
     document.getElementById("score").innerHTML=score;
@@ -397,22 +399,29 @@
       return;
     }
     showBoardWithDiv();
+    directionChanged=false;
     timeId = setTimeout(move,speed)
   }
   function SetDirection(newDirection){
-    if (direction==="right" && newDirection==="left"){
+    if(directionChanged){
       return;
     }
-    if (direction==="left" && newDirection==="right"){
+    if(direction==="right" && newDirection==="left"){
       return;
     }
-    if (direction==="up" && newDirection==="down"){
+    if(direction==="left" && newDirection==="right"){
       return;
     }
-    if (direction==="down" && newDirection==="up"){
+    if(direction==="up" && newDirection==="down"){
       return;
     }
-    direction=newDirection;
+    if(direction==="down" && newDirection==="up"){
+      return;
+    }
+    if(direction!==newDirection){
+      direction=newDirection;
+      directionChanged=true;
+    }
   }
   function endGame(){
     if(score > bestScore){
