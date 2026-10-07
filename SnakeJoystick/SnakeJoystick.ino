@@ -13,6 +13,11 @@ USBHIDKeyboard Keyboard;
 #define pinBtnGreen 17
 #define pinBtnRed 18
 
+// ==================== LEDs ====================
+
+#define pinLedGreen 15
+#define pinLedRed 16
+
 // ==================== Variables ====================
 
 int joystickX = 0;
@@ -33,6 +38,12 @@ void setup()
 
     pinMode(pinBtnGreen, INPUT_PULLUP);
     pinMode(pinBtnRed, INPUT_PULLUP);
+
+    pinMode(pinLedGreen, OUTPUT);
+    pinMode(pinLedRed, OUTPUT);
+
+    digitalWrite(pinLedGreen, LOW);
+    digitalWrite(pinLedRed, LOW);
 
     Keyboard.begin();
     USB.begin();
@@ -124,6 +135,30 @@ void loop()
         Keyboard.press(KEY_RETURN);
         delay(20);
         Keyboard.releaseAll();
+    }
+
+    if (Serial.available())
+    {
+        String command = Serial.readStringUntil('\n');
+        command.trim();
+
+        if (command == "FOOD")
+        {
+            digitalWrite(pinLedGreen, HIGH);
+            delay(150);
+            digitalWrite(pinLedGreen, LOW);
+        }
+
+        if (command == "GAMEOVER")
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                digitalWrite(pinLedRed, HIGH);
+                delay(200);
+                digitalWrite(pinLedRed, LOW);
+                delay(200);
+            }
+        }
     }
 
     delay(10);
