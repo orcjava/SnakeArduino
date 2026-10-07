@@ -1,72 +1,130 @@
+#include "USB.h"
+#include "USBHIDKeyboard.h"
+
+USBHIDKeyboard Keyboard;
+
+// ==================== Joystick ====================
+
 #define pinJoystickX 6
 #define pinJoystickY 7
-#define pinLedGreen 15
-#define pinLedRed 16
+
+// ==================== Buttons ====================
+
 #define pinBtnGreen 17
 #define pinBtnRed 18
 
+// ==================== Variables ====================
+
 int joystickX = 0;
 int joystickY = 0;
-int btnGreenState = 0;
-int btnRedState = 0;
-String lastCommand = ""; 
 
-void setup() {
-    Serial.begin(115200); 
-    pinMode(pinLedGreen, OUTPUT);
-    pinMode(pinLedRed, OUTPUT);
+int greenButton = HIGH;
+int redButton = HIGH;
+
+int lastDirection = 0;
+
+// =====================================================
+// SETUP
+// =====================================================
+
+void setup()
+{
+    Serial.begin(9600);
+
     pinMode(pinBtnGreen, INPUT_PULLUP);
     pinMode(pinBtnRed, INPUT_PULLUP);
+
+    Keyboard.begin();
+    USB.begin();
+
+    delay(3000);
 }
 
-void loop() {
-    if (Serial.available() > 0) {
-        String incomingData = Serial.readStringUntil('\n');
-        incomingData.trim();
-        if (incomingData == "GAMEOVER") {
-            digitalWrite(pinLedRed, HIGH);
-            delay(1000);
-            digitalWrite(pinLedRed, LOW);
-        }
-    }
+// =====================================================
+// LOOP
+// =====================================================
 
+void loop()
+{
     joystickX = analogRead(pinJoystickX);
     joystickY = analogRead(pinJoystickY);
-    btnGreenState = digitalRead(pinBtnGreen);
-    btnRedState = digitalRead(pinBtnRed);
 
-    if (btnGreenState == LOW)  digitalWrite(pinLedGreen, HIGH);
-    else                       digitalWrite(pinLedGreen, LOW);
+    greenButton = digitalRead(pinBtnGreen);
+    redButton = digitalRead(pinBtnRed);
 
-    if (btnRedState == LOW)    digitalWrite(pinLedRed, HIGH);
-    else if (Serial.available() == 0) digitalWrite(pinLedRed, LOW);
+    int currentDirection = 0;
 
-    String currentCommand = "";
-
-    if (joystickY < 700) {
-        currentCommand = "UP";
-    } else if (joystickY > 3300) {
-        currentCommand = "DOWN";
-    }
-    
-    if (currentCommand == "") {
-        if (joystickX < 700)       currentCommand = "LEFT";  
-        else if (joystickX > 3300) currentCommand = "RIGHT"; 
-    }
-    
-    if (currentCommand == "") {
-        if (btnGreenState == LOW)      currentCommand = "GREEN";
-        else if (btnRedState == LOW)   currentCommand = "RED";
+    if (joystickX < 1200)
+    {
+        currentDirection = 1;
     }
 
-    if (currentCommand != "" && currentCommand != lastCommand) {
-        Serial.println(currentCommand); 
-        lastCommand = currentCommand;
-    }
-    
-    if (joystickX >= 700 && joystickX <= 3300 && joystickY >= 700 && joystickY <= 3300 && btnGreenState == HIGH && btnRedState == HIGH) {
-        lastCommand = ""; 
+    if (joystickX > 2800)
+    {
+        currentDirection = 2;
     }
 
-    delay(30); 
+    if (joystickY < 1200)
+    {
+        currentDirection = 3;
+    }
+
+    if (joystickY > 2800)
+    {
+        currentDirection = 4;
+    }
+
+    if (currentDirection != 0 && currentDirection != lastDirection)
+    {
+        if (currentDirection == 1)
+        {
+            Keyboard.press(KEY_LEFT_ARROW);
+            delay(20);
+            Keyboard.releaseAll();
+        }
+
+        if (currentDirection == 2)
+        {
+            Keyboard.press(KEY_RIGHT_ARROW);
+            delay(20);
+            Keyboard.releaseAll();
+        }
+
+        if (currentDirection == 3)
+        {
+            Keyboard.press(KEY_UP_ARROW);
+            delay(20);
+            Keyboard.releaseAll();
+        }
+
+        if (currentDirection == 4)
+        {
+            Keyboard.press(KEY_DOWN_ARROW);
+            delay(20);
+            Keyboard.releaseAll();
+        }
+
+        lastDirection = currentDirection;
+    }
+
+    if (currentDirection == 0)
+    {
+        lastDirection = 0;
+    }
+
+    if (greenButton == LOW)
+    {
+        Keyboard.press(KEY_RETURN);
+        delay(20);
+        Keyboard.releaseAll();
+    }
+
+    if (redButton == LOW)
+    {
+        Keyboard.press(KEY_RETURN);
+        delay(20);
+        Keyboard.releaseAll();
+    }
+
+    delay(10);
 }
