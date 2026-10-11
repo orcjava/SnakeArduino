@@ -289,6 +289,25 @@
     oscillator.stop(audioContext.currentTime + 0.15);
   }
 
+  // Play a short sound when the snake changes direction
+  function playTurnSound(){
+    const audioContext = getAudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+
+    oscillator.type = "square";
+    oscillator.frequency.value = 450;
+
+    gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.05);
+  }
+
   // Play a low sound when the game ends
   function playGameOverSound(){
     const audioContext = getAudioContext();
@@ -502,6 +521,7 @@
     if(direction!==newDirection){
       direction=newDirection;
       directionChanged=true;
+      playTurnSound();
     }
   }
 
