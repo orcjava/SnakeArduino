@@ -6,233 +6,191 @@
   <title>Snake Game</title>
   <style>
     body{
-      direction: ltr;
-      font-family: Arial, sans-serif;
-      font-size: 22px;
-      color: white;
-      background: linear-gradient(135deg, #17143a, #30206b, #162b4d);
-      min-height: 100vh;
-      margin: 0;
-      text-align: center;
+      direction:ltr;
+      font-family:Arial,sans-serif;
+      font-size:22px;
+      color:white;
+      background:linear-gradient(135deg,#17143a,#30206b,#162b4d);
+      min-height:100vh;
+      margin:0;
+      text-align:center;
     }
     .greenText{
-      background-color: rgba(31, 41, 55, 0.9);
-      width: 80%;
-      margin: 12px auto;
-      padding: 8px;
-      text-align: center;
-      border-radius: 15px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
+      background-color:rgba(31,41,55,0.9);
+      width:80%;
+      margin:12px auto;
+      padding:8px;
+      text-align:center;
+      border-radius:15px;
+      box-shadow:0 0 20px rgba(0,0,0,0.4);
     }
     h1.greenText{
-      font-size: 42px;
-      margin-top: 12px;
-      margin-bottom: 12px;
+      font-size:42px;
+      margin-top:12px;
+      margin-bottom:12px;
     }
     #gameStartMsg{
-      font-size: 20px;
+      font-size:20px;
     }
-    #gameStartMsg button,
-    #gameOverMsg button{
-      font-size: 16px;
-      padding: 7px 12px;
-      border: none;
-      border-radius: 8px;
-      background-color: #4f46e5;
-      color: white;
-      cursor: pointer;
-      margin-top: 6px;
+    #gameStartMsg button,#gameOverMsg button{
+      font-size:16px;
+      padding:7px 12px;
+      border:none;
+      border-radius:8px;
+      background-color:#4f46e5;
+      color:white;
+      cursor:pointer;
+      margin-top:6px;
     }
-    #gameStartMsg button:hover,
-    #gameOverMsg button:hover{
-      background-color: #6366f1;
+    #gameStartMsg button:hover,#gameOverMsg button:hover{
+      background-color:#6366f1;
     }
     #scorePanel{
-      width: 420px;
-      max-width: 90%;
-      box-sizing: border-box;
-      margin: 12px auto;
-      font-size: 20px;
-      background: rgba(31, 41, 55, 0.9);
-      padding: 12px 14px;
-      border: 1px solid rgba(129, 140, 248, 0.45);
-      border-radius: 12px;
-      box-shadow: 0 0 18px rgba(99, 102, 241, 0.25);
+      width:300px;
+      margin:12px auto;
+      font-size:20px;
+      background:rgba(31,41,55,0.9);
+      padding:12px 14px;
+      border:1px solid rgba(129,140,248,0.45);
+      border-radius:12px;
+      box-shadow:0 0 18px rgba(99,102,241,0.25);
     }
-    #scorePanel .scoreValue{
-      display: inline-block;
-      min-width: 28px;
-      color: #a5f3fc;
-      font-size: 24px;
-      font-weight: bold;
-      text-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
-    }
-    #soundControls{
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    #muteButton{
-      font-size: 16px;
-      padding: 9px 14px;
-      border: 1px solid rgba(129, 140, 248, 0.6);
-      border-radius: 10px;
-      background-color: #303b51;
-      color: white;
-      cursor: pointer;
-    }
-    #muteButton:hover{
-      background-color: #4b5563;
-    }
-    #redButtonHint{
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      font-size: 15px;
-      color: #f3f4f6;
-      white-space: nowrap;
-    }
-    .redButtonIcon{
-      width: 17px;
-      height: 17px;
-      display: inline-block;
-      box-sizing: border-box;
-      background: linear-gradient(145deg, #ff737d, #d92f45);
-      border: 2px solid #ff9ca5;
-      border-radius: 50%;
-      box-shadow: 0 0 7px rgba(239, 68, 68, 0.45);
+    #scorePanel span{
+      display:inline-block;
+      min-width:28px;
+      color:#a5f3fc;
+      font-size:24px;
+      font-weight:bold;
+      text-shadow:0 0 8px rgba(56,189,248,0.35);
     }
     .gameArea{
-      width: 508px;
-      max-width: 96vw;
-      margin: 12px auto;
+      width:508px;
+      margin:12px auto;
     }
     #gameBoard{
-      margin: 0;
-      width: 500px;
-      max-width: calc(96vw - 8px);
-      aspect-ratio: 1;
-      display: grid;
-      grid-template-columns: repeat(20,1fr);
-      grid-template-rows: repeat(20,1fr);
-      background-color: #111827;
-      border: 4px solid #6366f1;
-      border-radius: 10px;
-      box-shadow: 0 0 25px rgba(99,102,241,0.5);
-      overflow: hidden;
+      margin:0;
+      width:500px;
+      display:grid;
+      grid-template-columns:repeat(20,25px);
+      grid-template-rows:repeat(20,25px);
+      background-color:#111827;
+      border:4px solid #6366f1;
+      border-radius:10px;
+      box-shadow:0 0 25px rgba(99,102,241,0.5);
+      overflow:hidden;
     }
     #gameBoard div{
-      border: 1px solid #1f2937;
+      border:1px solid #1f2937;
     }
     .food{
-      background-color: #f43f5e;
-      border-radius: 50%;
-      box-shadow: 0 0 10px #f43f5e;
-      animation: foodPulse 1s ease-in-out infinite alternate;
+      background-color:#f43f5e;
+      border-radius:50%;
+      box-shadow:0 0 10px #f43f5e;
+      animation:foodPulse 1s ease-in-out infinite alternate;
     }
     @keyframes foodPulse{
       from{
-        box-shadow: 0 0 5px #f43f5e;
-        transform: scale(0.85);
+        box-shadow:0 0 5px #f43f5e;
+        transform:scale(0.85);
       }
       to{
-        box-shadow: 0 0 15px #fb7185;
-        transform: scale(1);
+        box-shadow:0 0 15px #fb7185;
+        transform:scale(1);
       }
     }
     .snake{
-      background-color: #38bdf8;
-      border-radius: 6px;
-      box-shadow: 0 0 6px #38bdf8;
+      background-color:#38bdf8;
+      border-radius:6px;
+      box-shadow:0 0 6px #38bdf8;
     }
     .snakeHead{
-      background-color: #a855f7;
-      border-radius: 8px;
-      box-shadow: 0 0 15px #a855f7;
-      position: relative;
+      background-color:#a855f7;
+      border-radius:8px;
+      box-shadow:0 0 15px #a855f7;
+      position:relative;
     }
-    .snakeHead::before,
-    .snakeHead::after{
-      content: "";
-      position: absolute;
-      width: 6px;
-      height: 6px;
-      background-color: white;
-      border-radius: 50%;
-      top: 5px;
+    .snakeHead::before,.snakeHead::after{
+      content:"";
+      position:absolute;
+      width:6px;
+      height:6px;
+      background-color:white;
+      border-radius:50%;
+      top:5px;
     }
     .snakeHead::before{
-      left: 5px;
+      left:5px;
     }
     .snakeHead::after{
-      right: 5px;
+      right:5px;
     }
     #gameOverMsg{
-      display: none;
-      position: fixed;
-      z-index: 10;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: rgba(127, 29, 29, 0.97);
-      width: 360px;
-      max-width: 85vw;
-      box-sizing: border-box;
-      margin: 0;
-      padding: 12px;
-      border-radius: 15px;
-      box-shadow: 0 0 25px rgba(239,68,68,0.5);
+      display:none;
+      position:fixed;
+      z-index:10;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      background-color:rgba(127,29,29,0.97);
+      width:360px;
+      max-width:85vw;
+      box-sizing:border-box;
+      margin:0;
+      padding:12px;
+      border-radius:15px;
+      box-shadow:0 0 25px rgba(239,68,68,0.5);
     }
     #gameOverMsg h2{
-      margin: 0 0 8px 0;
-      color: #fca5a5;
-      font-size: 32px;
+      margin:0 0 8px 0;
+      color:#fca5a5;
+      font-size:32px;
     }
     #gameOverMsg p{
-      margin: 8px;
-      font-size: 20px;
+      margin:8px;
+      font-size:20px;
     }
     #connectArduino{
-      font-size: 16px;
-      padding: 7px 12px;
-      border: none;
-      border-radius: 8px;
-      background-color: #059669;
-      color: white;
-      cursor: pointer;
-      margin: 6px 4px 0;
+      font-size:16px;
+      padding:7px 12px;
+      border:none;
+      border-radius:8px;
+      background-color:#059669;
+      color:white;
+      cursor:pointer;
+      margin:6px 4px 0;
     }
     #connectArduino:hover{
-      background-color: #10b981;
+      background-color:#10b981;
     }
     #connectionStatus{
-      font-size: 15px;
-      margin-top: 5px;
+      font-size:15px;
+      margin-top:5px;
+    }
+    #muteButton{
+      font-size:16px;
+      padding:7px 12px;
+      border:1px solid rgba(129,140,248,0.6);
+      border-radius:8px;
+      background-color:#374151;
+      color:white;
+      cursor:pointer;
+      margin:6px 4px 0;
+    }
+    #muteButton:hover{
+      background-color:#4b5563;
     }
   </style>
 </head>
 <body>
-<h1 class="greenText">
-  Snake Game
-</h1>
+<h1 class="greenText">Snake Game</h1>
 <div class="greenText" id="gameStartMsg">
   Green Button: Start | Red Button: Mute / Unmute
-  <br />
+  <br>
   Arrow Keys: Move | Space: Mute / Unmute
-  <br />
-  <br />
-  <button onclick="startNewGame();">
-    Start New Game
-  </button>
-  <button id="connectArduino" onclick="connectArduino();">
-    Connect Arduino
-  </button>
-  <div id="connectionStatus">
-    Arduino not connected
-  </div>
+  <br><br>
+  <button onclick="startNewGame();">Start New Game</button>
+  <button id="connectArduino" onclick="connectArduino();">Connect Arduino</button>
+  <div id="connectionStatus">Arduino not connected</div>
 </div>
 <div id="gameOverMsg">
   <h2>GAME OVER</h2>
@@ -240,37 +198,30 @@
   <p>Best Score: <span id="bestScore">0</span></p>
   <p>Green Button / Enter: New Game</p>
   <p>Red Button / Space: Mute / Unmute</p>
-  <button onclick="startNewGame();">
-    Start New Game
-  </button>
+  <button onclick="startNewGame();">Start New Game</button>
 </div>
 <div id="scorePanel">
-  Score: <span class="scoreValue" id="score">0</span>
+  Score: <span id="score">0</span>
   &nbsp;&nbsp;
-  Best: <span class="scoreValue" id="best">0</span>
-  <div id="soundControls">
-    <button id="muteButton" onclick="toggleMute();">🔊 Sound: ON</button>
-    <span id="redButtonHint">
-      <span class="redButtonIcon"></span>
-      <span id="redButtonText">Red Button: Mute</span>
-    </span>
-  </div>
+  Best: <span id="best">0</span>
+  <br>
+  <button id="muteButton" onclick="toggleMute();">🔊 Sound: ON</button>
 </div>
 <div class="gameArea">
   <div id="gameBoard"></div>
 </div>
 <script>
   // Game settings and score
-  let score = 0;
-  let bestScore = 0;
-  let speed = 500;
+  let score=0;
+  let bestScore=0;
+  let speed=500;
   let removeTailCnt=0;
   const CellValues={
     EMPTY:0,
     FOOD:5,
     SNAKE:2,
-    SNAKE_HEAD:4,
-  }
+    SNAKE_HEAD:4
+  };
   // Current direction and board settings
   let direction="right";
   let directionChanged=false;
@@ -281,30 +232,26 @@
   let snake;
   let board=[];
   // Serial connection and shared audio context
-  let serialPort = null;
-  let serialWriter = null;
-  let audio = null;
-  let isMuted = false;
-  let gameStarted = false;
-  let musicTimer = null;
-  let musicOscillator = null;
-  let ambientNoteIndex = 0;
-  const ambientNotes = [
-    196, 261.63, 329.63, 261.63,
-    220, 293.66, 349.23, 293.66,
-    196, 261.63, 392, 329.63,
-    220, 293.66, 329.63, 261.63
-  ];
+  let serialPort=null;
+  let serialWriter=null;
+  let audio=null;
+  let isMuted=false;
+  let gameStarted=false;
+  let musicTimer=null;
+  let musicOscillators=[];
+  let ambientNoteIndex=0;
+  const ambientNotes=[659.25,523.25,587.33,659.25,783.99,659.25,587.33,523.25,440,523.25,587.33,659.25,587.33,523.25,493.88,523.25];
+  const bassNotes=[130.81,110,146.83,98];
   // Connect to Arduino through the browser
   async function connectArduino(){
-    if (!("serial" in navigator)){
+    if(!("serial" in navigator)){
       document.getElementById("connectionStatus").innerHTML="Web Serial is not supported in this browser";
       return;
     }
     try{
-      serialPort = await navigator.serial.requestPort();
-      await serialPort.open({baudRate: 9600});
-      serialWriter = serialPort.writable.getWriter();
+      serialPort=await navigator.serial.requestPort();
+      await serialPort.open({baudRate:9600});
+      serialWriter=serialPort.writable.getWriter();
       document.getElementById("connectionStatus").innerHTML="Arduino connected";
     }
     catch(error){
@@ -313,170 +260,168 @@
   }
   // Send game events to Arduino
   async function sendToArduino(message){
-    if(serialWriter === null){
+    if(serialWriter===null){
       return;
     }
-    const data = new TextEncoder().encode(message + "\n");
+    const data=new TextEncoder().encode(message+"\n");
     await serialWriter.write(data);
   }
   // Reuse one audio context for faster sound playback
   function getAudioContext(){
-    if(audio === null){
-      audio = new AudioContext();
+    if(audio===null){
+      audio=new AudioContext();
     }
-    if(audio.state === "suspended"){
+    if(audio.state==="suspended"){
       audio.resume();
     }
     return audio;
   }
-  // Play a short note in the retro background pattern
-  function playAmbientSound(){
-    if(isMuted || !gameStarted || gameOver){
-      return;
-    }
-    const audioContext = getAudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    const frequency = ambientNotes[ambientNoteIndex];
-    const speedLevel = Math.max(0, (500 - speed) / 50);
-    musicOscillator = oscillator;
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(frequency + speedLevel * 8, audioContext.currentTime);
-    const noteDuration = Math.max(100, 175 - speedLevel * 8);
-    gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.045, audioContext.currentTime + 0.025);
-    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + noteDuration / 1000);
+  // Play one musical tone and fade it out
+  function playMusicTone(frequency,duration,type,volume){
+    const audioContext=getAudioContext();
+    const oscillator=audioContext.createOscillator();
+    const gain=audioContext.createGain();
+    oscillator.type=type;
+    oscillator.frequency.setValueAtTime(frequency,audioContext.currentTime);
+    gain.gain.setValueAtTime(0.0001,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(volume,audioContext.currentTime+0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001,audioContext.currentTime+duration);
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
+    musicOscillators.push(oscillator);
+    oscillator.onended=function(){
+      const index=musicOscillators.indexOf(oscillator);
+      if(index!==-1){
+        musicOscillators.splice(index,1);
+      }
+      oscillator.disconnect();
+      gain.disconnect();
+    };
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + noteDuration / 1000);
-    ambientNoteIndex = (ambientNoteIndex + 1) % ambientNotes.length;
-    const pause = ambientNoteIndex % 4 === 0 ? 100 : 35;
-    musicTimer = setTimeout(playAmbientSound, noteDuration + pause);
+    oscillator.stop(audioContext.currentTime+duration);
   }
-  // Start the background pattern while the game is running
+  // Play the next step of the repeating melody
+  function playAmbientSound(){
+    if(isMuted||!gameStarted||gameOver){
+      return;
+    }
+    const speedLevel=Math.max(0,(500-speed)/50);
+    const beatDuration=Math.max(170,320-speedLevel*20);
+    const noteDuration=beatDuration*0.78;
+    const frequency=ambientNotes[ambientNoteIndex];
+    playMusicTone(frequency,noteDuration/1000,"square",0.055);
+    if(ambientNoteIndex%4===0){
+      const bassIndex=Math.floor(ambientNoteIndex/4)%bassNotes.length;
+      playMusicTone(bassNotes[bassIndex],(beatDuration*3.2)/1000,"triangle",0.12);
+    }
+    if(ambientNoteIndex%2===1){
+      playMusicTone(1046.50,(beatDuration*0.18)/1000,"square",0.018);
+    }
+    ambientNoteIndex=(ambientNoteIndex+1)%ambientNotes.length;
+    musicTimer=setTimeout(playAmbientSound,beatDuration);
+  }
+  // Start the background music
   function startMusic(){
-    if(isMuted || !gameStarted || gameOver){
+    if(isMuted||!gameStarted||gameOver){
       return;
     }
     stopMusic();
-    ambientNoteIndex = 0;
-    musicTimer = setTimeout(playAmbientSound, 500);
+    ambientNoteIndex=0;
+    musicTimer=setTimeout(playAmbientSound,150);
   }
-  // Stop the background sounds
+  // Stop the timer and all currently playing music tones
   function stopMusic(){
     clearTimeout(musicTimer);
-    musicTimer = null;
-    if(musicOscillator !== null){
+    musicTimer=null;
+    const activeOscillators=[...musicOscillators];
+    musicOscillators=[];
+    for(const oscillator of activeOscillators){
       try{
-        musicOscillator.stop();
-      }catch(error){
-        // The sound may already have stopped naturally
+        oscillator.stop();
       }
-      musicOscillator = null;
+      catch(error){
+// The oscillator may have already stopped
+      }
     }
   }
-  // Update the sound button and red button instructions
+  // Update the visible mute button label
   function updateMuteButton(){
-    const button = document.getElementById("muteButton");
-    const redButtonText = document.getElementById("redButtonText");
+    const button=document.getElementById("muteButton");
     if(button){
-      button.innerHTML = isMuted ? "🔇 Sound: OFF" : "🔊 Sound: ON";
-    }
-    if(redButtonText){
-      redButtonText.innerHTML = isMuted ? "Red Button: Unmute" : "Red Button: Mute";
+      button.innerHTML=isMuted?"🔇 Sound: OFF":"🔊 Sound: ON";
     }
   }
   // Toggle all game sounds on or off
   function toggleMute(){
-    isMuted = !isMuted;
+    isMuted=!isMuted;
     if(isMuted){
       stopMusic();
-    } else if(gameStarted && !gameOver){
+    }else if(gameStarted&&!gameOver){
       startMusic();
     }
     updateMuteButton();
   }
-  // Play a brighter sound when the snake eats food
+  // Play a short sound when the snake eats food
   function playFoodSound(){
     if(isMuted){
       return;
     }
-    const audioContext = getAudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
+    const audioContext=getAudioContext();
+    const oscillator=audioContext.createOscillator();
+    const gain=audioContext.createGain();
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-    oscillator.type = "sine";
-    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(1100, audioContext.currentTime + 0.12);
-    gain.gain.setValueAtTime(0.22, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+    oscillator.type="sine";
+    oscillator.frequency.value=700;
+    gain.gain.setValueAtTime(0.2,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.15);
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.12);
+    oscillator.stop(audioContext.currentTime+0.15);
   }
   // Play a short sound when the snake changes direction
   function playTurnSound(){
     if(isMuted){
       return;
     }
-    const audioContext = getAudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
+    const audioContext=getAudioContext();
+    const oscillator=audioContext.createOscillator();
+    const gain=audioContext.createGain();
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-    oscillator.type = "square";
-    oscillator.frequency.value = 450;
-    gain.gain.setValueAtTime(0.08, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
+    oscillator.type="square";
+    oscillator.frequency.value=450;
+    gain.gain.setValueAtTime(0.08,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.05);
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.05);
+    oscillator.stop(audioContext.currentTime+0.05);
   }
-  // Play a sound when the snake speeds up
-  function playSpeedUpSound(){
-    if(isMuted){
-      return;
-    }
-    const audioContext = getAudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
-    oscillator.connect(gain);
-    gain.connect(audioContext.destination);
-    oscillator.type = "square";
-    oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 0.18);
-    gain.gain.setValueAtTime(0.12, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.18);
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.18);
-  }
-  // Play a low sound when the game ends
+  // Play a sound when the game ends
   function playGameOverSound(){
     if(isMuted){
       return;
     }
-    const audioContext = getAudioContext();
-    const oscillator = audioContext.createOscillator();
-    const gain = audioContext.createGain();
+    const audioContext=getAudioContext();
+    const oscillator=audioContext.createOscillator();
+    const gain=audioContext.createGain();
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-    oscillator.type = "triangle";
-    oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
-    gain.gain.setValueAtTime(0.25, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    oscillator.type="triangle";
+    oscillator.frequency.setValueAtTime(300,audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100,audioContext.currentTime+0.5);
+    gain.gain.setValueAtTime(0.25,audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+0.5);
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.5);
+    oscillator.stop(audioContext.currentTime+0.5);
   }
   // Reset the game and create a new snake
   function startNewGame(){
     getAudioContext();
     stopMusic();
-    gameStarted = true;
+    gameStarted=true;
     clearTimeout(timeId);
     timeId=null;
-    score = 0;
-    speed = 500;
+    score=0;
+    speed=500;
     removeTailCnt=0;
     direction="right";
     directionChanged=false;
@@ -490,7 +435,7 @@
     AddFood();
     showBoardWithDiv();
     startMusic();
-    timeId = setTimeout(move,speed)
+    timeId=setTimeout(move,speed);
   }
   // Fill the board with empty cells
   function createBoard(){
@@ -504,10 +449,10 @@
   // Place food in a random empty cell
   function AddFood(){
     let row,col;
-    do {
-      col = Math.floor(Math.random() * numOfCols);
-      row = Math.floor(Math.random() * numOfRows);
-    }while(board[row][col] !== CellValues.EMPTY);
+    do{
+      col=Math.floor(Math.random()*numOfCols);
+      row=Math.floor(Math.random()*numOfRows);
+    }while(board[row][col]!==CellValues.EMPTY);
     board[row][col]=CellValues.FOOD;
   }
   // Draw the board using HTML elements
@@ -517,10 +462,16 @@
     for(let r=0;r<numOfRows;r++){
       for(let c=0;c<numOfCols;c++){
         let el=document.createElement("div");
-        switch (board[r][c]) {
-          case CellValues.SNAKE:      el.classList.add("snake");      break;
-          case CellValues.SNAKE_HEAD: el.classList.add("snakeHead");  break;
-          case CellValues.FOOD:       el.classList.add("food");       break;
+        switch(board[r][c]){
+          case CellValues.SNAKE:
+            el.classList.add("snake");
+            break;
+          case CellValues.SNAKE_HEAD:
+            el.classList.add("snakeHead");
+            break;
+          case CellValues.FOOD:
+            el.classList.add("food");
+            break;
         }
         brd.appendChild(el);
       }
@@ -531,19 +482,14 @@
     board[5][2]=CellValues.SNAKE_HEAD;
     board[5][1]=CellValues.SNAKE;
     board[5][0]=CellValues.SNAKE;
-    snake=[
-      {r:5,c:2},
-      {r:5,c:1},
-      {r:5,c:0}
-    ];
+    snake=[{r:5,c:2},{r:5,c:1},{r:5,c:0}];
   }
   // Update the score when food is eaten
   function FoodEaten(){
     removeTailCnt=3;
     score+=10;
-    if(score % 30 === 0 && speed > 150){
-      speed -= 50;
-      playSpeedUpSound();
+    if(score%30===0&&speed>150){
+      speed-=50;
     }
     AddFood();
     document.getElementById("score").innerHTML=score;
@@ -552,17 +498,16 @@
   }
   // Move the snake one cell and check for collisions
   function GenStep(newRow,newCol,head){
-    if (board[newRow][newCol]===CellValues.FOOD) {
+    if(board[newRow][newCol]===CellValues.FOOD){
       FoodEaten();
     }
-    if (removeTailCnt === 0){
-      let tail = snake.pop();
-      board[tail.r][tail.c] = CellValues.EMPTY;
-    } else {
+    if(removeTailCnt===0){
+      let tail=snake.pop();
+      board[tail.r][tail.c]=CellValues.EMPTY;
+    }else{
       removeTailCnt--;
     }
-    if ((board[newRow][newCol]===CellValues.SNAKE)||
-            (board[newRow][newCol]===CellValues.SNAKE_HEAD)){
+    if(board[newRow][newCol]===CellValues.SNAKE||board[newRow][newCol]===CellValues.SNAKE_HEAD){
       endGame();
       return;
     }
@@ -575,7 +520,7 @@
     let head=snake[0];
     let newCol=head.c-1;
     let newRow=head.r;
-    if (newCol < 0) {
+    if(newCol<0){
       endGame();
       return;
     }
@@ -586,7 +531,7 @@
     let head=snake[0];
     let newCol=head.c+1;
     let newRow=head.r;
-    if (newCol>=numOfCols) {
+    if(newCol>=numOfCols){
       endGame();
       return;
     }
@@ -597,7 +542,7 @@
     let head=snake[0];
     let newCol=head.c;
     let newRow=head.r-1;
-    if (newRow < 0) {
+    if(newRow<0){
       endGame();
       return;
     }
@@ -608,7 +553,7 @@
     let head=snake[0];
     let newCol=head.c;
     let newRow=head.r+1;
-    if (newRow >= numOfRows) {
+    if(newRow>=numOfRows){
       endGame();
       return;
     }
@@ -619,34 +564,34 @@
     if(gameOver){
       return;
     }
-    switch (direction) {
-      case "up":    moveUp();     break;
-      case "right": moveRight();  break;
-      case "left":  moveLeft();   break;
-      case "down":  moveDown();   break;
+    switch(direction){
+      case "up":moveUp();break;
+      case "right":moveRight();break;
+      case "left":moveLeft();break;
+      case "down":moveDown();break;
     }
     if(gameOver){
       return;
     }
     showBoardWithDiv();
     directionChanged=false;
-    timeId = setTimeout(move,speed);
+    timeId=setTimeout(move,speed);
   }
   // Allow one turn per step and block reverse movement
   function SetDirection(newDirection){
     if(directionChanged){
       return;
     }
-    if(direction==="right" && newDirection==="left"){
+    if(direction==="right"&&newDirection==="left"){
       return;
     }
-    if(direction==="left" && newDirection==="right"){
+    if(direction==="left"&&newDirection==="right"){
       return;
     }
-    if(direction==="up" && newDirection==="down"){
+    if(direction==="up"&&newDirection==="down"){
       return;
     }
-    if(direction==="down" && newDirection==="up"){
+    if(direction==="down"&&newDirection==="up"){
       return;
     }
     if(direction!==newDirection){
@@ -660,8 +605,8 @@
     if(gameOver){
       return;
     }
-    if(score > bestScore){
-      bestScore = score;
+    if(score>bestScore){
+      bestScore=score;
     }
     document.getElementById("finalScore").innerHTML=score;
     document.getElementById("bestScore").innerHTML=bestScore;
@@ -696,7 +641,7 @@
     }
     if(event.key==="Enter"){
       event.preventDefault();
-      if(gameOver || document.getElementById("gameStartMsg").style.display!=="none"){
+      if(gameOver||document.getElementById("gameStartMsg").style.display!=="none"){
         startNewGame();
       }
     }
@@ -708,7 +653,6 @@
     }
   });
   updateMuteButton();
-  // Show the start screen when the page opens
   document.getElementById("gameStartMsg").style.display="block";
 </script>
 </body>
