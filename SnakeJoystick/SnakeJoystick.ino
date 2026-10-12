@@ -1,3 +1,4 @@
+
 #include "USB.h"
 #include "USBHIDKeyboard.h"
 
@@ -25,6 +26,9 @@ int joystickY = 0;
 
 int greenButton = HIGH;
 int redButton = HIGH;
+
+int lastGreenButton = HIGH;
+int lastRedButton = HIGH;
 
 int lastDirection = 0;
 
@@ -123,20 +127,27 @@ void loop()
         lastDirection = 0;
     }
 
-    if (greenButton == LOW)
+    // Green button: Start a new game using Enter
+    if (greenButton == LOW && lastGreenButton == HIGH)
     {
         Keyboard.press(KEY_RETURN);
         delay(20);
         Keyboard.releaseAll();
     }
 
-    if (redButton == LOW)
+    lastGreenButton = greenButton;
+
+    // Red button: Toggle sound using Space
+    if (redButton == LOW && lastRedButton == HIGH)
     {
-        Keyboard.press(KEY_RETURN);
+        Keyboard.press(' ');
         delay(20);
         Keyboard.releaseAll();
     }
 
+    lastRedButton = redButton;
+
+    // Handle commands received from the game
     if (Serial.available())
     {
         String command = Serial.readStringUntil('\n');
