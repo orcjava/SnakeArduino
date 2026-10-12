@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -47,7 +48,9 @@
       background-color: #6366f1;
     }
     #scorePanel{
-      width: 300px;
+      width: 420px;
+      max-width: 90%;
+      box-sizing: border-box;
       margin: 12px auto;
       font-size: 20px;
       background: rgba(31, 41, 55, 0.9);
@@ -56,7 +59,7 @@
       border-radius: 12px;
       box-shadow: 0 0 18px rgba(99, 102, 241, 0.25);
     }
-    #scorePanel span{
+    #scorePanel .scoreValue{
       display: inline-block;
       min-width: 28px;
       color: #a5f3fc;
@@ -64,16 +67,57 @@
       font-weight: bold;
       text-shadow: 0 0 8px rgba(56, 189, 248, 0.35);
     }
+    #soundControls{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    #muteButton{
+      font-size: 16px;
+      padding: 9px 14px;
+      border: 1px solid rgba(129, 140, 248, 0.6);
+      border-radius: 10px;
+      background-color: #303b51;
+      color: white;
+      cursor: pointer;
+    }
+    #muteButton:hover{
+      background-color: #4b5563;
+    }
+    #redButtonHint{
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 15px;
+      color: #f3f4f6;
+      white-space: nowrap;
+    }
+    .redButtonIcon{
+      width: 17px;
+      height: 17px;
+      display: inline-block;
+      box-sizing: border-box;
+      background: linear-gradient(145deg, #ff737d, #d92f45);
+      border: 2px solid #ff9ca5;
+      border-radius: 50%;
+      box-shadow: 0 0 7px rgba(239, 68, 68, 0.45);
+    }
     .gameArea{
       width: 508px;
+      max-width: 96vw;
       margin: 12px auto;
     }
     #gameBoard{
       margin: 0;
       width: 500px;
+      max-width: calc(96vw - 8px);
+      aspect-ratio: 1;
       display: grid;
-      grid-template-columns: repeat(20,25px);
-      grid-template-rows: repeat(20,25px);
+      grid-template-columns: repeat(20,1fr);
+      grid-template-rows: repeat(20,1fr);
       background-color: #111827;
       border: 4px solid #6366f1;
       border-radius: 10px;
@@ -126,7 +170,6 @@
     .snakeHead::after{
       right: 5px;
     }
-    /* Show Game Over above the game without moving the board */
     #gameOverMsg{
       display: none;
       position: fixed;
@@ -176,7 +219,9 @@
   Snake Game
 </h1>
 <div class="greenText" id="gameStartMsg">
-  Press the red or green button to start the game
+  Green Button: Start | Red Button: Mute / Unmute
+  <br />
+  Arrow Keys: Move | Space: Mute / Unmute
   <br />
   <br />
   <button onclick="startNewGame();">
@@ -193,15 +238,23 @@
   <h2>GAME OVER</h2>
   <p>Your Score: <span id="finalScore">0</span></p>
   <p>Best Score: <span id="bestScore">0</span></p>
-  <p>Press the red or green button to start a new game</p>
+  <p>Green Button / Enter: New Game</p>
+  <p>Red Button / Space: Mute / Unmute</p>
   <button onclick="startNewGame();">
     Start New Game
   </button>
 </div>
 <div id="scorePanel">
-  Score: <span id="score">0</span>
+  Score: <span class="scoreValue" id="score">0</span>
   &nbsp;&nbsp;
-  Best: <span id="best">0</span>
+  Best: <span class="scoreValue" id="best">0</span>
+  <div id="soundControls">
+    <button id="muteButton" onclick="toggleMute();">🔊 Sound: ON</button>
+    <span id="redButtonHint">
+      <span class="redButtonIcon"></span>
+      <span id="redButtonText">Red Button: Mute</span>
+    </span>
+  </div>
 </div>
 <div class="gameArea">
   <div id="gameBoard"></div>
@@ -227,12 +280,21 @@
   let gameOver=false;
   let snake;
   let board=[];
-
   // Serial connection and shared audio context
   let serialPort = null;
   let serialWriter = null;
   let audio = null;
-
+  let isMuted = false;
+  let gameStarted = false;
+  let musicTimer = null;
+  let musicOscillator = null;
+  let ambientNoteIndex = 0;
+  const ambientNotes = [
+    196, 261.63, 329.63, 261.63,
+    220, 293.66, 349.23, 293.66,
+    196, 261.63, 392, 329.63,
+    220, 293.66, 329.63, 261.63
+  ];
   // Connect to Arduino through the browser
   async function connectArduino(){
     if (!("serial" in navigator)){
@@ -249,7 +311,6 @@
       document.getElementById("connectionStatus").innerHTML="Arduino connection failed";
     }
   }
-
   // Send game events to Arduino
   async function sendToArduino(message){
     if(serialWriter === null){
@@ -258,7 +319,6 @@
     const data = new TextEncoder().encode(message + "\n");
     await serialWriter.write(data);
   }
-
   // Reuse one audio context for faster sound playback
   function getAudioContext(){
     if(audio === null){
@@ -269,68 +329,150 @@
     }
     return audio;
   }
-
-  // Play a short sound when the snake eats food
-  function playFoodSound(){
+  // Play a short note in the retro background pattern
+  function playAmbientSound(){
+    if(isMuted || !gameStarted || gameOver){
+      return;
+    }
     const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
-
+    const frequency = ambientNotes[ambientNoteIndex];
+    const speedLevel = Math.max(0, (500 - speed) / 50);
+    musicOscillator = oscillator;
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(frequency + speedLevel * 8, audioContext.currentTime);
+    const noteDuration = Math.max(100, 175 - speedLevel * 8);
+    gain.gain.setValueAtTime(0.0001, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.045, audioContext.currentTime + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, audioContext.currentTime + noteDuration / 1000);
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-
-    oscillator.type = "sine";
-    oscillator.frequency.value = 700;
-
-    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-
     oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.15);
+    oscillator.stop(audioContext.currentTime + noteDuration / 1000);
+    ambientNoteIndex = (ambientNoteIndex + 1) % ambientNotes.length;
+    const pause = ambientNoteIndex % 4 === 0 ? 100 : 35;
+    musicTimer = setTimeout(playAmbientSound, noteDuration + pause);
   }
-
+  // Start the background pattern while the game is running
+  function startMusic(){
+    if(isMuted || !gameStarted || gameOver){
+      return;
+    }
+    stopMusic();
+    ambientNoteIndex = 0;
+    musicTimer = setTimeout(playAmbientSound, 500);
+  }
+  // Stop the background sounds
+  function stopMusic(){
+    clearTimeout(musicTimer);
+    musicTimer = null;
+    if(musicOscillator !== null){
+      try{
+        musicOscillator.stop();
+      }catch(error){
+        // The sound may already have stopped naturally
+      }
+      musicOscillator = null;
+    }
+  }
+  // Update the sound button and red button instructions
+  function updateMuteButton(){
+    const button = document.getElementById("muteButton");
+    const redButtonText = document.getElementById("redButtonText");
+    if(button){
+      button.innerHTML = isMuted ? "🔇 Sound: OFF" : "🔊 Sound: ON";
+    }
+    if(redButtonText){
+      redButtonText.innerHTML = isMuted ? "Red Button: Unmute" : "Red Button: Mute";
+    }
+  }
+  // Toggle all game sounds on or off
+  function toggleMute(){
+    isMuted = !isMuted;
+    if(isMuted){
+      stopMusic();
+    } else if(gameStarted && !gameOver){
+      startMusic();
+    }
+    updateMuteButton();
+  }
+  // Play a brighter sound when the snake eats food
+  function playFoodSound(){
+    if(isMuted){
+      return;
+    }
+    const audioContext = getAudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1100, audioContext.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.22, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.12);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.12);
+  }
   // Play a short sound when the snake changes direction
   function playTurnSound(){
+    if(isMuted){
+      return;
+    }
     const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
-
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-
     oscillator.type = "square";
     oscillator.frequency.value = 450;
-
     gain.gain.setValueAtTime(0.08, audioContext.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.05);
-
     oscillator.start();
     oscillator.stop(audioContext.currentTime + 0.05);
   }
-
-  // Play a low sound when the game ends
-  function playGameOverSound(){
+  // Play a sound when the snake speeds up
+  function playSpeedUpSound(){
+    if(isMuted){
+      return;
+    }
     const audioContext = getAudioContext();
     const oscillator = audioContext.createOscillator();
     const gain = audioContext.createGain();
-
     oscillator.connect(gain);
     gain.connect(audioContext.destination);
-
+    oscillator.type = "square";
+    oscillator.frequency.setValueAtTime(500, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(1000, audioContext.currentTime + 0.18);
+    gain.gain.setValueAtTime(0.12, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.18);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.18);
+  }
+  // Play a low sound when the game ends
+  function playGameOverSound(){
+    if(isMuted){
+      return;
+    }
+    const audioContext = getAudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
     oscillator.type = "triangle";
     oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
     oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.5);
-
     gain.gain.setValueAtTime(0.25, audioContext.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-
     oscillator.start();
     oscillator.stop(audioContext.currentTime + 0.5);
   }
-
   // Reset the game and create a new snake
   function startNewGame(){
     getAudioContext();
+    stopMusic();
+    gameStarted = true;
     clearTimeout(timeId);
     timeId=null;
     score = 0;
@@ -347,9 +489,9 @@
     InitSnake();
     AddFood();
     showBoardWithDiv();
+    startMusic();
     timeId = setTimeout(move,speed)
   }
-
   // Fill the board with empty cells
   function createBoard(){
     for(let i=0;i<numOfRows;i++){
@@ -359,7 +501,6 @@
       }
     }
   }
-
   // Place food in a random empty cell
   function AddFood(){
     let row,col;
@@ -369,7 +510,6 @@
     }while(board[row][col] !== CellValues.EMPTY);
     board[row][col]=CellValues.FOOD;
   }
-
   // Draw the board using HTML elements
   function showBoardWithDiv(){
     let brd=document.getElementById("gameBoard");
@@ -386,33 +526,30 @@
       }
     }
   }
-
   // Create the snake at its starting position
   function InitSnake(){
     board[5][2]=CellValues.SNAKE_HEAD;
     board[5][1]=CellValues.SNAKE;
     board[5][0]=CellValues.SNAKE;
-    snake=
-            [
-              {r:5,c:2},
-              {r:5,c:1},
-              {r:5,c:0}
-            ];
+    snake=[
+      {r:5,c:2},
+      {r:5,c:1},
+      {r:5,c:0}
+    ];
   }
-
   // Update the score when food is eaten
   function FoodEaten(){
     removeTailCnt=3;
     score+=10;
     if(score % 30 === 0 && speed > 150){
       speed -= 50;
+      playSpeedUpSound();
     }
     AddFood();
     document.getElementById("score").innerHTML=score;
     playFoodSound();
     sendToArduino("FOOD");
   }
-
   // Move the snake one cell and check for collisions
   function GenStep(newRow,newCol,head){
     if (board[newRow][newCol]===CellValues.FOOD) {
@@ -430,10 +567,9 @@
       return;
     }
     snake.unshift({r:newRow,c:newCol});
-    board[newRow][newCol]=CellValues.SNAKE_HEAD
+    board[newRow][newCol]=CellValues.SNAKE_HEAD;
     board[head.r][head.c]=CellValues.SNAKE;
   }
-
   // Calculate the next cell when moving left
   function moveLeft(){
     let head=snake[0];
@@ -445,7 +581,6 @@
     }
     GenStep(newRow,newCol,head);
   }
-
   // Calculate the next cell when moving right
   function moveRight(){
     let head=snake[0];
@@ -457,7 +592,6 @@
     }
     GenStep(newRow,newCol,head);
   }
-
   // Calculate the next cell when moving up
   function moveUp(){
     let head=snake[0];
@@ -469,7 +603,6 @@
     }
     GenStep(newRow,newCol,head);
   }
-
   // Calculate the next cell when moving down
   function moveDown(){
     let head=snake[0];
@@ -481,7 +614,6 @@
     }
     GenStep(newRow,newCol,head);
   }
-
   // Move the snake and schedule the next step
   function move(){
     if(gameOver){
@@ -498,9 +630,8 @@
     }
     showBoardWithDiv();
     directionChanged=false;
-    timeId = setTimeout(move,speed)
+    timeId = setTimeout(move,speed);
   }
-
   // Allow one turn per step and block reverse movement
   function SetDirection(newDirection){
     if(directionChanged){
@@ -524,7 +655,6 @@
       playTurnSound();
     }
   }
-
   // Stop the game and update the best score
   function endGame(){
     if(gameOver){
@@ -541,10 +671,11 @@
     clearTimeout(timeId);
     timeId=null;
     gameOver=true;
+    gameStarted=false;
+    stopMusic();
     playGameOverSound();
     sendToArduino("GAMEOVER");
   }
-
   // Use keyboard arrows and Enter to control the game
   document.addEventListener("keydown",function(event){
     if(event.key==="ArrowUp"){
@@ -569,8 +700,14 @@
         startNewGame();
       }
     }
+    if(event.code==="Space"){
+      event.preventDefault();
+      if(!event.repeat){
+        toggleMute();
+      }
+    }
   });
-
+  updateMuteButton();
   // Show the start screen when the page opens
   document.getElementById("gameStartMsg").style.display="block";
 </script>
